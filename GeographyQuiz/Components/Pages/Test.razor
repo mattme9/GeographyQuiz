@@ -1,0 +1,26 @@
+﻿@page "/Test"
+@rendermode InteractiveServer
+<div class="flex-container">
+	<div class="flex-item">
+		<h1>My favorite pizza is: @favPizza</h1>
+		<br />
+	</div>"
+	<p>
+		Enter your favorite pizza:
+		<input @bind-value="favPizza" @bind-value:event="oninput" />
+	</p>
+	<hr />
+</div>
+
+<div class="flex-container">
+	<div class="flex-item">
+		<p>
+			<input @bind="birthdate" @bind:format="dd-MM-yy" />
+		</p>
+	</div>
+</div>
+
+@code {
+	private string favPizza { get; set; } = "Margherita";
+	private DateTime birthdate { get; set; } = new(2000, 1, 1);
+}
