@@ -1,0 +1,53 @@
+﻿@page "/Game/Country"
+@using GeographyQuiz.Models;
+
+<h1>@score</h1>
+<img src="@currentCountry.ImagePath" alt="ImageHere" height="300px" width="200px" />
+<h1>What's the country?</h1>
+<h3>@errorMessage</h3>
+<input @bind-value="guess" @bind-value:event="oninput" />
+<button type="button" @onclick="CheckAnswer">Check</button>
+
+@code {
+	public List<Country> countries = new();
+	Country currentCountry;
+	private string guess { get; set; } = "";
+	private string errorMessage = "";
+	public int score;
+
+	protected override void OnInitialized()
+	{
+		countries.AddRange(new List<Country>
+		{
+			new Country{Name = "Germany", Capital = "Berlin", ImagePath="/resources/germany.png"},
+			new Country{Name = "France", Capital = "Paris", ImagePath="/resources/france.png"},
+			new Country{Name = "Sweden", Capital = "Stockholm", ImagePath="/resources/sweden.jpg"},
+			new Country{Name = "Norway", Capital = "Oslo", ImagePath="/resources/norway.png"},
+			new Country{Name = "Finland", Capital = "Helsinki", ImagePath="/resources/finland.png"},
+		});
+
+		currentCountry = countries[0];
+	}
+
+	public void CheckAnswer()
+	{
+		if (guess.ToLower() == currentCountry.Name.ToLower())
+		{
+			score++;
+			NextCountry();
+		}
+		else
+		{
+			errorMessage = "Wrong answer, try again!";
+		}
+
+	}
+
+	private void NextCountry()
+	{
+		var random = new Random();
+		currentCountry = countries[random.Next(0, countries.Count)];
+		errorMessage = "";
+		guess = "";
+	}
+}
