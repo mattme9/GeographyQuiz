@@ -1,21 +1,27 @@
 ﻿@page "/Game/Country"
 @using GeographyQuiz.Models
 @rendermode InteractiveServer
-
+@inject NavigationManager NavigationManager
+<head>
+	<link rel="stylesheet" href="styling\Countries.css" />
+</head>
 <main>
-
 	<div class="container">
 		<div class="row justify-content-center">
 			<div class="col-md-6">
-				<h1 class="text-center">@score</h1>
 				<div class="text-center">
 					<img src="@currentCountry.ImagePath" alt="ImageHere" class="img-fluid" />
 				</div>
-				<h1 class="text-center">What's the country?</h1>
+				<h1 class="text-center">Score: @score / @maxScore</h1>
 				<h3 class="text-center">@errorMessage</h3>
 				<div class="text-center">
 					<input @bind-value="guess" @bind-value:event="oninput" @onkeypress="KeyPressHandler" class="form-control" />
-					<button type="button" @onclick="CheckAnswer" class="btn btn-primary mt-3">Check</button>
+					<TimerBar TotalTime="20" />
+					<button type="button" @onclick="CheckAnswer" class="btn btn-custom mt-3">Submit</button>
+					@if(isGameCompleted)
+					{
+						<button @onclick="PageReload" class=" btn btn-custom mt-3">Play Again</button>
+					}
 				</div>
 			</div>
 		</div>
@@ -24,10 +30,13 @@
 
 @code {
 	public List<Country> countries = new();
+	Random random = new Random();
 	Country currentCountry;
 	private string guess { get; set; } = "";
 	private string errorMessage { get; set; } = "";
-	public int score;
+	public int score { get; set; } = 0;
+	public int maxScore { get; set; } = 0;
+	public bool isGameCompleted { get; set; } = false;
 
 	protected override void OnInitialized()
 	{
@@ -41,6 +50,12 @@
 		});
 
 		currentCountry = countries[0];
+		maxScore = countries.Count;
+	}
+
+	private void PageReload()
+	{
+		NavigationManager.NavigateTo("/Game/Country", true);
 	}
 
 	public void CheckAnswer()
@@ -52,17 +67,33 @@
 		}
 		else
 		{
-			errorMessage = "Wrong answer, try again!";
+			errorMessage = "Incorrect. The correct answer is " + currentCountry.Name;
+			NextCountry();
 		}
 
 	}
 
 	private void NextCountry()
 	{
-		var random = new Random();
-		currentCountry = countries[random.Next(0, countries.Count)];
-		errorMessage = "";
-		guess = "";
+		foreach (var item in countries)
+		{
+			if (item.Name == currentCountry.Name)
+			{
+				countries.Remove(item);
+				break;
+			}
+		}
+		if (countries.Count > 0)
+		{
+			currentCountry = countries[random.Next(0, countries.Count)];
+			errorMessage = "";
+			guess = "";
+		}
+		else
+		{
+			errorMessage = "You have completed the game!";
+			isGameCompleted = true;
+		}
 	}
 
 	private void KeyPressHandler(KeyboardEventArgs e)
